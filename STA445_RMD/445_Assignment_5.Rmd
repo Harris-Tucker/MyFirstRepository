@@ -1,0 +1,151 @@
+---
+title: "Assignment 5"
+author: "Tucker Harris"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)   # loading ggplot2 and dplyr
+library(patchwork)   # arranging multiple graphs into 1 figure
+library(viridis)     # The viridis color schemes
+library(latex2exp)   # For plotting math notation
+library(plotly)     # for interactive hover-text
+library(faraway)
+library(ggrepel)
+```
+
+
+## Question 1 ab)
+
+I know we never learned the force command, but for some reason this was the only way it would let me load the dataset.
+
+I also made this graph before looking at parts a-b. I thought those were adjustments for after making the first graph.
+
+```{r}
+MortRate <- force(infmort)
+
+Plot1 <- ggplot( MortRate, aes( x = log10( mortality ), y = log10(income), color = oil ) )+
+  geom_point() +
+  facet_grid(.~region)
+
+
+Plot1
+```
+
+## Question 1c)
+
+```{r}
+
+
+Plot2 <- ggplot( MortRate, aes( x = mortality, y = income, color = oil ) )+
+  geom_point() +
+  facet_grid(.~region) +
+  scale_x_log10() +
+  scale_y_log10()
+
+
+
+
+Plot2
+
+
+
+
+```
+I prefer to just use the log10 function inside the aes function.
+
+
+
+
+##1d
+
+I had this graph label all countries that are below S on an alphabetical list.
+
+```{r}
+
+MortRate2 <- MortRate %>% mutate(country = rownames(MortRate))
+
+MortRate2 <- MortRate2 %>% mutate(partialCountry = str_remove_all(country, "^[A-S].*"))
+
+
+
+Plot3 <- ggplot( MortRate2, aes( x = log10( mortality ), label = partialCountry, y = log10(income), color = oil ) )+
+  geom_point() +
+  facet_grid(.~region) +
+  geom_label_repel()
+  
+
+Plot3
+```
+
+
+
+## Question 2a
+
+```{r}
+
+data(trees)
+
+
+
+treeModel <- lm(trees$Volume~trees$Height)
+
+treeModel
+```
+
+## Question 2b)
+```{r}
+summary(treeModel)
+```
+
+## Question 2c
+
+```{r}
+ggplot(treeModel, aes( x = trees$Height, y = trees$Volume ) ) +
+  geom_point() 
+```
+
+## Question 2d
+
+```{r}
+ggplot(treeModel, aes( x = trees$Height, y = trees$Volume ) ) +
+  geom_point() + 
+  annotate('rect', xmin=65, xmax=75, ymin=60, ymax=74,
+         fill='white', color='black') 
+  
+```
+
+## Queston 2e
+
+```{r}
+ggplot( treeModel, aes( x = trees$Height, y = trees$Volume ) ) +
+  geom_point() + 
+  annotate( 'rect', xmin=65, xmax=75, ymin=60, ymax=74,
+         fill='white', color='black' ) +
+  annotate( 'text', x = 70, y = 67, size=5, color='purple', label='yhat = -87.12 + 1.54Xi' )
+```
+
+## Question 2f
+
+```{r}
+TwolabelTreePlot <- ggplot( treeModel, aes( x = trees$Height, y = trees$Volume ) ) +
+  geom_point() + 
+  annotate( 'rect', xmin=60, xmax=70, ymin=65, ymax=79,
+         fill='white', color='black' ) +
+  annotate( 'text', x = 65, y = 72, size=5, color='purple', label='yhat = -87.12 + 1.54Xi' ) +
+  annotate( 'rect', xmin=60, xmax=70, ymin=45, ymax=59,
+            fill='white', color='black' ) +
+  annotate('text', x = 65, y = 52, size = 5, color ='purple', label='R^2 = 0.358')
+
+TwolabelTreePlot
+```
+
+## Question 2g 
+
+```{r}
+
+TwolabelTreePlot + geom_abline(intercept = -87.12, slope = 1.54, color = 'red', size = 3)
+
+```

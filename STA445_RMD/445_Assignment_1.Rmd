@@ -1,0 +1,199 @@
+---
+title: "445_Assignment_1"
+author: "Tucker Harris"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter 8 Question 1
+
+
+```{r}
+vec_a<-c( 2, 4, 6 )
+vec_b<-c( 8, 10, 12 )
+vec_c<-vec_a + vec_b
+
+vec_c
+```
+
+## Chapter 8 Question 2
+
+``` {r}
+vec_d <- c( 14, 20 )
+vec_d + vec_a
+
+# This adds va[1] + vd[1], va[2] + vd[2], va[3] + vd[1]
+
+# The shorter vector merely repeats once it runs out of elements
+
+# the warning is merely saying that one is shorter than the other
+
+```
+
+## Chapter 8 Question 3
+
+``` {r}
+vec_a + 5
+
+# This merely added a 5 to each element within vec_a, there is no warning
+# Because there is no vector end bound breached.
+```
+
+
+## Chapter 8 Question 4
+
+```{r}
+
+seq_vec <- seq(1,5,1)
+colon_vec <- 1:5
+
+seq_vec
+colon_vec
+
+
+
+```
+
+
+
+## Chapter 8 Question 5
+
+```{r}
+
+even_seq <- seq(2, 20, 2)
+even_col <- 2 * 1:10
+
+even_seq
+even_col
+
+
+```
+
+
+## Chapter 8 Question 6
+
+```{r}
+
+seq(0,1,length.out=21)
+
+# Can also do this
+
+seq(0,1,0.05) 
+# But less efficient, as sometimes it may not be as nice of a number
+# As 0.05, so using the length.out makes the computer figure out the math for you
+
+```
+
+## Chapter 8 Question 7
+
+```{r}
+
+rep( c( 2, 4, 8 ), 3 )
+
+```
+
+## Chapter 8 Question 8
+
+```{r}
+
+ rep( c( 2, 4, 8 ), each = 4)
+
+
+
+```
+
+
+## Chapter 8 Question 10
+
+```{r}
+
+M <- matrix( seq( 2, 30, 2 ), nrow = 3, byrow=TRUE )
+M
+
+a <- seq( 2, 10, 2 )
+b <- seq( 12, 20, 2 )
+c <- seq( 22, 30, 2 )
+
+
+M <- rbind(a,b,c)
+
+M
+
+```
+
+
+## Chapter 8 Question 12
+
+```{r}
+df <- data.frame(name= c('Alice','Bob','Charlie','Daniel'),
+                 Grade = c(6,8,NA,9))
+
+df[ -which(  is.na(df$Grade) ), ]
+df[  which( !is.na(df$Grade) ), ]
+
+
+
+
+```
+
+The first method manually places values and column names into a new matrix. First way that NA is taken out of the matrix is by merely subtracting the df$Grade values with the na value. The second way uses the ! (not) operator. That says display all the values that are not "na"
+
+
+## Chapter 8 Question 14
+
+``` {r}
+
+x = c(4,5,6,7,8,9,10)
+y = c(34,35,41,40,45,47,51)
+slope = 2.82
+p.value = 0.000131
+
+my.test <- list( x = x, y = y, Slope = slope, P = p.value )
+
+my.test
+
+my.test[2]
+
+my.test['P']
+
+
+```
+## Chapter 9 Question 1
+
+```{r}
+
+library(tidyverse)
+library(readxl)
+library(googlesheets4)
+
+```
+Use file --> import dataset to bring the "Raw Data" page into R Studio. I also told it to skip rows 1:4, as those are either headers or empty.
+
+```{r}
+tree <- read_excel('Example_5.xls', range = "A5:C36", sheet = 2 ) 
+
+str( tree )
+
+
+```
+The three columns and 31 rows are displayed appropriately.
+
+
+
+## Chapter 9 Question 2
+
+File -> Import Dataset, then select Example_3.xls
+
+```{r}
+
+tesla <- read_excel('Example_3.xls', range = "A1:L34", na = "-9999", sheet = 2 )
+
+
+tail(tesla)
+
+```
+

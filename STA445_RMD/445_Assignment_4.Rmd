@@ -1,0 +1,318 @@
+---
+title: "445_Assignment_4"
+author: "Tucker Harris"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+## Question 1a
+```{r}
+Survey <- 
+  read.csv('https://www.lock5stat.com/datasets3e/StudentSurvey.csv',
+           na.strings=c('',' '))
+
+head(Survey)
+
+```
+
+## Question 1b)
+```{r}
+SurveyA <- count( Survey, Year, Sex )
+
+SurveyA <- SurveyA %>% drop_na()
+
+SurveyA
+
+# I could not figure out how to order the Years. I will hopefully have time to return to this later
+
+```
+
+## Question 1c)
+
+```{r}
+SurveyB <- SurveyA %>% pivot_wider(names_from = Year, values_from = n)
+
+
+SurveyB 
+
+
+```
+
+## Question 2a)
+
+```{r}
+
+Temperature <-  read.csv('https://raw.githubusercontent.com/dereksonderegger/444/master/data-raw/FlagMaxTemp.csv', na.strings=c('NA',' '))
+
+head(Temperature)
+
+Temperature05 <- Temperature %>% filter (Year == 2005)
+
+Temperature1 <- Temperature05 %>% pivot_longer(X1:X31, names_to = "Day", values_to = "Temperature")
+
+
+Temperature1 <- Temperature1 %>% mutate(Day = str_remove_all( Day, 'X'))
+
+DayTemp <- Temperature1 %>% mutate(date = make_date(year = Year, month = Month, day = Day))
+
+DayTemp1 <- DayTemp %>% select( Temperature, date )
+
+DayTemp1 <- DayTemp1 %>% mutate(Temperature = as.numeric(Temperature))
+
+ggplot( data = DayTemp1, aes(x=date, y=Temperature) ) + geom_point() +
+  labs("Daily 2005 temperatures", x = "Date", y = "Temperature" )
+
+```
+## Question 2b)
+
+```{r}
+Temperature1315 <- Temperature %>% filter(Year >= 2013 & Year <= 2015)
+
+Temp1 <- Temperature1315 %>% pivot_longer(X1:X31, names_to = "Day", values_to = "Temperature")
+
+Temp1<- Temp1 %>% drop_na()
+
+Temp1 <- Temp1 %>% mutate(Day = str_remove_all( Day, 'X'))
+
+Temp1 <- Temp1 %>% mutate(date = make_date(year = Year, month = Month))
+
+Temp1 <- Temp1 %>% group_by(Year, Month) %>% summarize(meanTemp = mean(Temperature))
+
+
+Temp1
+
+ggplot( data = Temp1, aes(x = Month, y = meanTemp, color = Year)) + geom_point()
+
+
+```
+
+## Question 4 a
+
+```{r}
+A <- tribble(
+  ~Name, ~Car,
+  'Alice', 'Ford F150',
+  'Bob',   'Tesla Model III',
+  'Charlie', 'VW Bug')
+
+B <- tribble(
+  ~First.Name, ~Pet,
+  'Bob',  'Cat',
+  'Charlie', 'Dog',
+  'Alice', 'Rabbit')
+
+B <- B %>% arrange(First.Name)
+
+
+AB <- cbind(A,B) %>% select(Name, Car, Pet)
+AB
+
+B <- B %>% rename("Name" = "First.Name")
+
+full_join(A, B)
+```
+
+## Question 3b)
+
+```{r}
+C <- tibble( Name = 'Alice', Pet = 'Guinea Pig')
+B <- rbind(B, C)
+
+B
+
+
+
+
+```
+## Question 3c)
+
+
+```{r}
+
+full_join(A,B)
+
+```
+Using Join is so much easier, as I could not figure out how to use cbind in this case. The number of rows being different gave me an error, so I was only able to use a join.
+
+## Question 4
+
+```{r}
+Customers <- tribble(
+  ~PersonID, ~Name, ~Street, ~City, ~State,
+  1, 'Derek Sonderegger',  '231 River Run', 'Flagstaff', 'AZ',
+  2, 'Aubrey Sonderegger', '231 River Run', 'Flagstaff', 'AZ',
+  3, 'Robert Buscaglia', '754 Forest Heights', 'Flagstaff', 'AZ',
+  4, 'Roy St Laurent', '845 Elk View', 'Flagstaff', 'AZ')
+
+Retailers <- tribble(
+  ~RetailID, ~Name, ~Street, ~City, ~State,
+  1, 'Kickstand Kafe', '719 N Humphreys St', 'Flagstaff', 'AZ',
+  2, 'MartAnnes', '112 E Route 66', 'Flagstaff', 'AZ',
+  3, 'REI', '323 S Windsor Ln', 'Flagstaff', 'AZ' )
+
+Cards <- tribble(
+  ~CardID, ~PersonID, ~Issue_DateTime, ~Exp_DateTime,
+  '9876768717278723',  1,  '2019-9-20 0:00:00', '2022-9-20 0:00:00',
+  '5628927579821287',  2,  '2019-9-20 0:00:00', '2022-9-20 0:00:00',
+  '7295825498122734',  3,  '2019-9-28 0:00:00', '2022-9-28 0:00:00',
+  '8723768965231926',  4,  '2019-9-30 0:00:00', '2022-9-30 0:00:00' ) 
+
+Transactions <- tribble(
+  ~CardID, ~RetailID, ~DateTime, ~Amount,
+  '9876768717278723', 1, '2019-10-1 8:31:23',    5.68,
+  '7295825498122734', 2, '2019-10-1 12:45:45',  25.67,
+  '9876768717278723', 1, '2019-10-2 8:26:31',    5.68,
+  '9876768717278723', 1, '2019-10-2 8:30:09',    9.23,
+  '5628927579821287', 3, '2019-10-5 18:58:57',  68.54,
+  '7295825498122734', 2, '2019-10-5 12:39:26',  31.84,
+  '8723768965231926', 2, '2019-10-10 19:02:20', 42.83) 
+
+Cards <- Cards %>% 
+  mutate( Issue_DateTime = lubridate::ymd_hms(Issue_DateTime),
+          Exp_DateTime   = lubridate::ymd_hms(Exp_DateTime) )
+Transactions <- Transactions %>% 
+  mutate( DateTime = lubridate::ymd_hms(DateTime))
+
+
+
+```
+
+## A
+
+```{r}
+# Filter Transactions for Derek
+derek_transactions <- Customers %>% 
+ filter(Name == 'Derek Sonderegger') 
+
+derek_transactions <- derek_transactions %>%
+ left_join(Cards, by = "PersonID") %>%
+ left_join(Transactions, by = "CardID") 
+
+derek_transactions <- derek_transactions %>%
+ left_join(Retailers, by = "RetailID") %>%
+ select(DateTime, Amount, Name = Name.x)
+
+derek_transactions
+
+
+```
+
+## B
+```{r}
+# Find Aubrey's card details
+aubrey_card_info <- Customers %>%
+  filter(Name == 'Aubrey Sonderegger') %>%
+  left_join(Cards, by = "PersonID")
+
+aubrey_card_info
+
+# Get CardID and PersonID for Aubrey
+cardID <- aubrey_card_info$CardID
+
+cardID
+
+personID <- aubrey_card_info$PersonID
+
+personID
+
+# Close the existing card (set Exp_DateTime to the time it's closed)
+close_time <- ymd_hms('2019-10-15 16:28:21')
+
+close_time
+
+Cards <- Cards %>%
+  mutate(Exp_DateTime = ifelse(CardID == cardID, close_time, Exp_DateTime))
+
+Cards
+
+# Generate a new CardID for Aubrey's new card (you can make up a new number)
+new_card_id <- '0321200302132003'
+
+# Insert the new card into the Cards table
+new_card <- tibble(CardID = new_card_id, PersonID = personID,
+                    Issue_DateTime = close_time,
+                    Exp_DateTime = close_time + years(3))  # Set a new expiration date
+
+new_card
+
+Cards <- rbind(Cards, new_card)
+
+Cards
+
+
+```
+I added the new card in three times. I am not exactly sure how I did that or how to fix it.
+
+
+## C
+```{r}
+
+# Define the transaction details
+card <- new_card_id  # Use Aubrey's new card ID
+retailid <- 1  # Retailer ID for Kickstand Kafe
+datetime <- ymd_hms('2019-10-16 14:30:21')
+amount <- 4.98
+
+# Create a new transaction
+new_transaction <- tibble(CardID = card, RetailID = retailid, DateTime = datetime, Amount = amount)
+
+# Append the new transaction to the Transactions table
+Transactions <- rbind(Transactions, new_transaction)
+
+
+
+Transactions
+
+```
+
+## D
+```{r}
+# Define the transaction details
+card <- '9876768717278723'  # OLD credit card
+retailid <- 2  # Retailer ID for REI
+datetime <- ymd_hms('2019-10-17 12:00:00')
+amount <- 100.00  # Example amount
+
+# Check if the card is currently valid
+Valid_Cards <- Cards %>% 
+  filter(CardID == card, Issue_DateTime <= datetime, datetime <= Exp_DateTime)
+
+# If the card is valid, insert the transaction into the table
+if (nrow(Valid_Cards) == 1) {
+  new_transaction <- tibble(CardID = card, RetailID = retailid, DateTime = datetime, Amount = amount)
+  Transactions <- rbind(Transactions, new_transaction)
+} else {
+  print('Card Denied')
+}
+```
+
+This does not print anything :(. I am not sure where my code is wrong.
+
+
+## E
+
+```{r}
+
+# Find Aubrey's card details
+aubrey_card_info <- Customers %>%
+  filter(Name == 'Aubrey Sonderegger') %>%
+  left_join(Cards, by = "PersonID")
+
+# Get Aubrey's CardIDs
+aubrey_card_ids <- aubrey_card_info$CardID
+
+# Filter and join transactions and retailer names for Aubrey's cards
+aubrey_statement <- Transactions %>%
+  filter(CardID %in% aubrey_card_ids) %>%
+  left_join(Retailers, by = "RetailID") %>%
+  select(DateTime, Amount, Name)
+
+aubrey_statement
+
+
+```
+
